@@ -28,6 +28,7 @@ public class GameOfLifeController implements Initializable
 {
   private Game game;
   private final int MAX_NEIGHBORS = 26;
+  Presets currentPreset = null;
   
   @FXML
   private ComboBox<Integer> comboBoxOne;
@@ -62,23 +63,43 @@ public class GameOfLifeController implements Initializable
   @FXML
   private SubScene subScene;
 
-  private enum Presets
+  public enum Presets
   {
-    PRESET1("Preset 1"), PRESET2("Preset 2"), PRESET3("Preset 3"), PRESET4(
-        "Preset 4"), PRESET5("Preset 5");
+    PRESET4("Preset 4")
+    {
+      public String getPreset() {return "110110000000110110110000000";}
+    }, 
+    PRESET1("Preset 1")
+    {
+      public String getPreset() {return "110000110110000110000000000";}
+    }, 
+    PRESET2("Preset 2")
+    {
+      public String getPreset() {return "110000110110000110000000000";}
+    }, 
+    PRESET3("Preset 3")
+    {
+      public String getPreset() {return "110000110110000110000000000";}
+    }, 
+    PRESET5("Preset 5")
+    {
+      public String getPreset() {return null;}
+    };
 
     private final String NAME;
 
+   
     private Presets(String name)
     {
       this.NAME = name;
     }
-
+   
     @Override
     public String toString()
     {
       return this.NAME;
     }
+    public abstract String getPreset();
   }
 
   public void setGame(Game game)
@@ -147,10 +168,11 @@ public class GameOfLifeController implements Initializable
   {
     return pane;
   }
-
+  
   private void handleGameRestart()
   {
-    game.restart();
+    if (currentPreset != null) game.restart(currentPreset.getPreset());
+    else game.restart(null);
     startButton.setText("Play");
   }
 
@@ -170,6 +192,7 @@ public class GameOfLifeController implements Initializable
     comboBoxTwo.setValue(rand.nextInt(MAX_NEIGHBORS) + 1);
     comboBoxThree.setValue(rand.nextInt(MAX_NEIGHBORS) + 1);
     comboBoxFour.setValue(rand.nextInt(MAX_NEIGHBORS) + 1);
+    currentPreset = null;
     handleGameRestart();
   }
 
@@ -206,66 +229,65 @@ public class GameOfLifeController implements Initializable
   @FXML
   private void handlePreset()
   {
+    Presets preset = null;
     if (presetComboBox.getValue() != null)
     {
       switch (presetComboBox.getValue())
       {
       case PRESET1:
       {
-        comboBoxOne.setValue(1);
+        comboBoxOne.setValue(4);
         comboBoxTwo.setValue(4);
-        comboBoxThree.setValue(4);
-        comboBoxFour.setValue(1);
+        comboBoxThree.setValue(3);
+        comboBoxFour.setValue(4);
         aliveDeadRatioComboBox.setValue(10);
-        gridDimensionComboBox.setValue(5);
+        gridDimensionComboBox.setValue(3);
         game.setSeed(123456789);
+        preset = Presets.PRESET1;
         break;
       }
 
       case PRESET2:
       {
-        comboBoxOne.setValue(2);
+        comboBoxOne.setValue(4);
         comboBoxTwo.setValue(4);
         comboBoxThree.setValue(4);
-        comboBoxFour.setValue(2);
-        aliveDeadRatioComboBox.setValue(10);
-        gridDimensionComboBox.setValue(8);
-        game.setSeed(123456789);
+        comboBoxFour.setValue(3);
+        gridDimensionComboBox.setValue(3);
+        preset = Presets.PRESET2;
         break;
       }
 
       case PRESET3:
       {
-        comboBoxOne.setValue(3);
-        comboBoxTwo.setValue(6);
-        comboBoxThree.setValue(6);
-        comboBoxFour.setValue(3);
-        aliveDeadRatioComboBox.setValue(20);
-        gridDimensionComboBox.setValue(10);
-        game.setSeed(123456789);
+        comboBoxOne.setValue(4);
+        comboBoxTwo.setValue(5);
+        comboBoxThree.setValue(3);
+        comboBoxFour.setValue(4);
+        gridDimensionComboBox.setValue(3);
+        preset = Presets.PRESET3;
         break;
       }
 
       case PRESET4:
       {
-        comboBoxOne.setValue(4);
-        comboBoxTwo.setValue(9);
-        comboBoxThree.setValue(9);
-        comboBoxFour.setValue(4);
-        aliveDeadRatioComboBox.setValue(20);
-        gridDimensionComboBox.setValue(20);
-        game.setSeed(123456789);
+        comboBoxOne.setValue(6);
+        comboBoxTwo.setValue(6);
+        comboBoxThree.setValue(7);
+        comboBoxFour.setValue(5);
+        gridDimensionComboBox.setValue(3);
+        preset = Presets.PRESET4;
         break;
       }
       case PRESET5:
       {
-        comboBoxOne.setValue(3);
-        comboBoxTwo.setValue(6);
-        comboBoxThree.setValue(6);
-        comboBoxFour.setValue(3);
-        aliveDeadRatioComboBox.setValue(10);
-        gridDimensionComboBox.setValue(30);
+        comboBoxOne.setValue(5);
+        comboBoxTwo.setValue(10);
+        comboBoxThree.setValue(15);
+        comboBoxFour.setValue(8);
+        gridDimensionComboBox.setValue(5);
         game.setSeed(123456789);
+        preset = Presets.PRESET5;
         break;
       }
       default:
@@ -273,7 +295,7 @@ public class GameOfLifeController implements Initializable
       }
 
     }
-    
+    currentPreset = preset;
     handleGameRestart();
   }
 

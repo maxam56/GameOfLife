@@ -22,13 +22,14 @@ public class CellGrid
   int[][][] newState;
   int[][][] currentState;
 
-  public CellGrid(int[] rValues, int maxDim, int seed, double aliveDeadRatio)
+
+  public CellGrid(int[] rValues, int maxDim, int seed, double aliveDeadRatio, String preset)
   {
     MAX_DIMENSIONS = maxDim;
     newState = new int[MAX_DIMENSIONS][MAX_DIMENSIONS][MAX_DIMENSIONS];
     currentState = new int[MAX_DIMENSIONS][MAX_DIMENSIONS][MAX_DIMENSIONS];
     cells = new Cell[MAX_DIMENSIONS][MAX_DIMENSIONS][MAX_DIMENSIONS];
-
+    
     if (seed > 0)
     {
       this.rand = new Random(seed);
@@ -39,9 +40,9 @@ public class CellGrid
     }
 
     this.aliveDeadRatio = aliveDeadRatio / 100;
-    shiftAmount = 0;
+    shiftAmount = 5;
 
-    initArrays();
+    initArrays(preset);
 
     r1 = rValues[0];
     r2 = rValues[1];
@@ -80,19 +81,20 @@ public class CellGrid
         for (int k = 1; k < MAX_DIMENSIONS - 1; k++)
         {
           Cell c = cells[i][j][k];
-          neighbors = getNeighbors(k, j, i);
-          if (neighbors >= r1 && neighbors <= r2)
+          int cellValue = currentState[i][j][k];
+          neighbors = getNeighbors(k, j, i, cellValue);
+          if ((neighbors >= r1 && neighbors <= r2) && cellValue == 0) //Rules for a new cell
           {
             newState[i][j][k] = 1;
             c.setAlive(true);
 
           }
-          if (neighbors > r3 || neighbors < r4)
+          else if (neighbors > r3 || neighbors < r4)
           {
             newState[i][j][k] = 0;
             c.setAlive(false);
           }
-
+          
           if (newState[i][j][k] != currentState[i][j][k])
           {
             c.setStateChanged(true);
@@ -103,6 +105,7 @@ public class CellGrid
           }
         }
       }
+
     }
 
     int[][][] tmp = newState;
@@ -110,9 +113,9 @@ public class CellGrid
     currentState = tmp;
   }
 
-  private int getNeighbors(int x, int y, int z)
+  private int getNeighbors(int x, int y, int z, int cellVal)
   {
-    int count = 0;
+    int count = (cellVal == 1) ? -1 : 0; //If that xyz equals 1 then detract one from our inital count.  This prevents us from doing multiple checks in the loop
 
     for (int i = z - 1; i < z + 2; i++)
     {
@@ -120,24 +123,27 @@ public class CellGrid
       {
         for (int k = x - 1; k < x + 2; k++)
         {
-          if (currentState[i][j][k] == 1 && (k != x && j != y && i != z))
-          {
-            count++;
-          }
+            if (currentState[i][j][k] == 1)
+            {
+              count++;
+            }
         }
       }
     }
+    
     return count;
   }
-
-  private void initArrays()
+  
+  private void initArrays(String preset)
   {
     double maxRad = Cell.getMaxDimension();
 
     double shiftX = 0;
     double shiftY = 0;
     double shiftZ = 0;
-
+    
+    int charPosistion = 0;
+    
     double x, y, z;
     x = y = z = 0;
 
@@ -148,8 +154,21 @@ public class CellGrid
       {
         for (int k = 1; k < MAX_DIMENSIONS - 1; k++)
         {
+          if (preset != null)
+          {
+            if (charPosistion < preset.length())
+            {
+              int v = Character.getNumericValue(preset.charAt(charPosistion));
+              currentState[i][j][k] = v;
+              charPosistion++;
+            }
 
-          currentState[i][j][k] = (rand.nextFloat() < aliveDeadRatio) ? 1 : 0;
+          }
+          else
+          {
+            currentState[i][j][k] = (rand.nextFloat() < aliveDeadRatio) ? 1 : 0;
+          }
+          
           newState[i][j][k] = 0;
           cells[i][j][k] = new Cell(x + shiftX, y + shiftY, z + shiftZ,
               (currentState[i][j][k] == 1 ? true : false)); // Addes a new cell

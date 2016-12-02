@@ -269,7 +269,7 @@ public class Game extends Application
   /**
    * Restarts the games by rebuild the grid and pulling new initial values
    */
-  public void restart()
+  public void restart(String preset)
   {
     if (frame != 0)
     {
@@ -277,7 +277,7 @@ public class Game extends Application
     }
 
     gridWorld.getChildren().clear();
-    buildGrid(controller.getRValues());
+    buildGrid(controller.getRValues(), preset);
     drawNewGrid(FRAME_RATIO, 1);
     setDefaultCameraPosition();
   }
@@ -287,10 +287,10 @@ public class Game extends Application
    * 
    * @param rValues
    */
-  public void buildGrid(int[] rValues)
+  public void buildGrid(int[] rValues, String preset)
   {
     int maxDim = controller.getMaxDim();
-    grid = new CellGrid(rValues, maxDim, seed, aliveDeadRatio);
+    grid = new CellGrid(rValues, maxDim, seed, aliveDeadRatio, preset);
     Cell[][][] cells = grid.getCellGrid();
     LinkedList<Group> cellAddList = new LinkedList<>();
 
@@ -327,7 +327,7 @@ public class Game extends Application
       gridWorld = new Xform();
 
       buildCamera();
-      buildGrid(controller.getRValues());
+      buildGrid(controller.getRValues(), null);
       setDefaultCameraPosition();
 
       subScene.setFill(Color.GRAY);
